@@ -1,4 +1,4 @@
-import { getSummary } from "./website-summary";
+import { getSummary } from "./summarize";
 
 (async () => {
   try {
