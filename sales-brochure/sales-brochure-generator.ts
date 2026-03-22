@@ -17,22 +17,10 @@ const openai = new OpenAI({
   apiKey,
 });
 
-const systemPrompt = `You are provied with list of links found on a webpage.
-You are tasked with providing which of these links are likely to be relevant to 
-include in a brochure about the company, eg: links of About page, or Company 
-page, or Carrers/jobs pages etc.
-You should response in JSON as in this example:
-{
- "links": [
-    {
-    "type": "about page",
-    "url": "https://www.example.com/about"
-    },
-    {
-    "type": "careers page",
-    "url": "https://www.example.com/careers"        
-    }]
-}`;
+const systemPrompt = `You are an assistant that analyzes the contents of several relevant pages from a company website
+and creates a short brochure about the company for prospective customers, investors and recruits.
+Respond in markdown without code blocks.
+Include details of company culture, customers and careers/jobs if you have the information.`;
 
 async function getLinksFromWebpage(webpageUrl: string) {
   const response = await fetch(webpageUrl);
@@ -58,26 +46,25 @@ eg: links of About page, or Company page, or Carrers/jobs pages etc.`;
 }
 
 export async function getBrochureLinks(webpageUrl: string) {
-    const userPrompt = await createUserPrompt(webpageUrl);
-    
-    const messages = [
-        {
-            role: "system",
-            content: systemPrompt
-        },
-        {
-            role: "user",
-            content: userPrompt
-        }
-    ];
+  const userPrompt = await createUserPrompt(webpageUrl);
 
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4.1-mini",
-        messages: messages as any,
-        max_tokens: 500,
-    });
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+    {
+      role: "user",
+      content: userPrompt,
+    },
+  ];
 
-    const brochureLinks = completion.choices[0].message.content;
-    return brochureLinks;
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: messages as any,
+    max_tokens: 500,
+  });
+
+  const brochureLinks = completion.choices[0].message.content;
+  return brochureLinks;
 }
-
